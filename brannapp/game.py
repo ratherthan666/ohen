@@ -30,11 +30,11 @@ TEXT_SIZE_MODIFIER = {
 
 
 class BranballGame(Screen):
-    def __init__(self, *, batting_order: list = ["Pálkař"], branner_name: str = "Bränner",
-                 score_array: list = [0, 0], output_file: str = None,
-                 team_names: list[str] = ["A", "B"], next_page: str = "Game",
-                 name: str, **kwargs):
-        super().__init__()
+    def __init__(self, name: str, *, batting_order: list = ["Pálkař"], branner_name: list[str] = ["Bränner"],
+                 score_array: list = [0, 0], output_file: list[str] = None,
+                 team_names: list[str] = ["A", "B"], next_page: str = "Game", time=list[dict[str, int]],
+                 **kwargs):
+        super().__init__(name=name, **kwargs)
         self.batting_order = batting_order
         self.teams = team_names
         self.score_array = score_array
@@ -42,10 +42,17 @@ class BranballGame(Screen):
         self.batting_index = 0
         self.components = {}
         self.timer = None
+        self.branner = branner_name
+        self.next = next_page
+        self.time: list[dict[str, int]] = time
+        if self.output_file is not None:
+            with open(self.output_file[0], 'w') as f:
+                f.write("čas,tým,hráč,událost,body")
 
+    def on_enter(self, *args):
         # Setup UI
-        self.setup_header(next_page)
-        self.setup_branner(branner_name)
+        self.setup_header()
+        self.setup_branner()
         self.setup_bater()
         self.setup_fielder()
         self.setup_runner()
@@ -56,7 +63,9 @@ class BranballGame(Screen):
 
         Window.bind(on_resize=self.resize_texts)
 
-        self.timer = Stopwatch(out_function=self.display_time, **kwargs)
+        self.timer = Stopwatch(out_function=self.display_time, hours=self.time[0]["hours"],
+                               minutes=self.time[0]["minutes"], seconds=self.time[0]["seconds"])
+        self.resize_texts(None)
 
     def resize_texts(self, *_):
         for comp in self.components.keys():
@@ -66,8 +75,8 @@ class BranballGame(Screen):
     def display_time(self, time: str) -> None:
         self.components["Timer"].text = time
 
-    def set_page(self, next_page):
-        self.root.current = next_page
+    def set_page(self):
+        self.current = self.next
 
     def change_timer(self, _):
         if self.timer.paused:
@@ -88,7 +97,7 @@ class BranballGame(Screen):
         str_event = f"\n{self.timer},{team},{player},{event},{points}"
         self.components["Backlog"].text += str_event
         if self.output_file is not None:
-            with open(self.output_file, 'a') as f:
+            with open(self.output_file[0], 'a') as f:
                 f.write(str_event)
         if event in {"Chycení do jedné ruky", "Chycení do obou rukou", "Brän"}:
             self.batting_index += 1
@@ -97,7 +106,7 @@ class BranballGame(Screen):
             self.components["Batter number"].text = str(self.batting_index)
             self.components["Batter"].text = self.batting_order[self.batting_index]
 
-    def setup_header(self, next_page: str):
+    def setup_header(self):
         self.components["Timer button"] = button.Button(text="Spustit/zastavit čas",
                                                         pos_hint={'center_x': .5, 'y': .94},
                                                         size_hint=(0.35, 0.05))
@@ -116,24 +125,24 @@ class BranballGame(Screen):
         self.components["End"] = button.Button(text="Ukončit",
                                                pos_hint={'center_x': .5, 'y': .02},
                                                size_hint=(0.35, 0.05))
-        self.components["Timer button"].bind(on_press=lambda: self.set_page(next_page))
+        self.components["End"].bind(on_press=lambda _: self.set_page())
 
-    def setup_branner(self, branner_name: str):
+    def setup_branner(self):
         self.components["Field team"] = label.Label(text=self.teams[0],
                                                     pos_hint={'center_x': .20, 'y': .70},
                                                     size_hint=(.25, .0325))
-        self.components["Branner"] = label.Label(text=branner_name,
+        self.components["Branner"] = label.Label(text=self.branner[0],
                                                  pos_hint={'center_x': .20, 'y': .64},
                                                  size_hint=(.25, .0325))
         self.components["Bran"] = button.Button(text="BRÄN",
                                                 pos_hint={'center_x': .20, 'y': .55},
                                                 size_hint=(.25, .05))
-        self.components["Bran"].bind(on_press=lambda _: self.make_event(self.teams[0], branner_name,
+        self.components["Bran"].bind(on_press=lambda _: self.make_event(self.teams[0], self.branner[0],
                                                                         'Brän', 0))
         self.components["Circle overstep"] = button.Button(text="Překročení kruhu",
                                                            pos_hint={'center_x': .20, 'y': .49},
                                                            size_hint=(.25, .05))
-        self.components["Circle overstep"].bind(on_press=lambda _: self.make_event(self.teams[0], branner_name,
+        self.components["Circle overstep"].bind(on_press=lambda _: self.make_event(self.teams[0], self.branner[0],
                                                                                    'Překročení kruhu', -4))
 
     def setup_bater(self):
