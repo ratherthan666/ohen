@@ -5,19 +5,19 @@ from kivy.core.window import Window
 
 TEXT_SIZE_MODIFIER = {
     "Time label": .0225,
-    "Hours": .11,
-    "Minutes": .11,
-    "Seconds": .11,
-    "Dot1": .11,
-    "Dot2": .11,
+    "Hours": .05,
+    "Minutes": .05,
+    "Seconds": .05,
+    "Dot1": .05,
+    "Dot2": .05,
     "Teams": .0225,
-    "Team1": .11,
-    "Team2": .11,
-    "Dot3": .11,
+    "Team1": .05,
+    "Team2": .05,
+    "Dot3": .05,
     "Randomize": .05,
     "Randomize text": .0225,
     "Header": .0225,
-    "Confirm": .05
+    "Confirm": .025
 }
 
 
@@ -32,6 +32,7 @@ class GameSetter(Screen):
         for comp in self.components.keys():
             self.add_widget(self.components[comp])
         Window.bind(on_resize=self.resize_texts)
+        self.resize_texts(None)
 
     def resize_texts(self, *_):
         for comp in self.components.keys():
@@ -51,13 +52,13 @@ class GameSetter(Screen):
         else:
             self.team_names[0] = self.components["Team1"].text
             self.team_names[1] = self.components["Team2"].text
-        self.manager.current = "Game"
+        self.manager.current = "start"
 
     def setup_ui(self):
         self.components["Header"] = label.Label(text="Vyberte základní parametry zápasu:",
                                                 pos_hint={'center_x': .5, 'y': .85},
                                                 size_hint=(0.40, 0.16))
-        self.components["Time label"] = label.Label(text="Zvolte délku zápasu (formát HH:MM:SS):",
+        self.components["Time label"] = label.Label(text="Zvolte délku poločasu (formát HH:MM:SS):",
                                                     pos_hint={'center_x': .5, 'y': .75},
                                                     size_hint=(0.35, 0.1))
         self.components["Hours"] = textinput.TextInput(input_filter="int",
@@ -88,11 +89,11 @@ class GameSetter(Screen):
         self.components["Team1"] = textinput.TextInput(pos_hint={'center_x': .2, 'y': .3},
                                                        size_hint=(0.36, 0.16),
                                                        halign="right",
-                                                       hint_text="Pálka")
+                                                       hint_text="Pole")
         self.components["Team2"] = textinput.TextInput(pos_hint={'center_x': .8, 'y': .3},
                                                        size_hint=(0.36, 0.16),
                                                        halign="left",
-                                                       hint_text="Pole")
+                                                       hint_text="Pálka")
         self.components["Dot3"] = label.Label(text="-",
                                               pos_hint={'center_x': .5, 'y': .3},
                                               size_hint=(0.2, 0.16))
@@ -105,4 +106,3 @@ class GameSetter(Screen):
                                                    pos_hint={'center_x': .5, 'y': .05},
                                                    size_hint=(0.40, 0.10))
         self.components["Confirm"].bind(on_press=self.next)
-

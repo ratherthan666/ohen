@@ -76,7 +76,7 @@ class BranballGame(Screen):
         self.components["Timer"].text = time
 
     def set_page(self):
-        self.current = self.next
+        self.manager.current = self.next
 
     def change_timer(self, _):
         if self.timer.paused:
@@ -103,7 +103,7 @@ class BranballGame(Screen):
             self.batting_index += 1
             if self.batting_index >= len(self.batting_order):
                 self.batting_index = 0
-            self.components["Batter number"].text = str(self.batting_index)
+            self.components["Batter number"].text = str(self.batting_index+1)
             self.components["Batter"].text = self.batting_order[self.batting_index]
 
     def setup_header(self):
