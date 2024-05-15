@@ -5,9 +5,9 @@ from kivy.core.window import Window
 
 TEXT_SIZE_MODIFIER = {
     "Time label": .0225,
-    "Hours": .05,
-    "Minutes": .05,
-    "Seconds": .05,
+    "Hours": .04,
+    "Minutes": .04,
+    "Seconds": .04,
     "Dot1": .05,
     "Dot2": .05,
     "Teams": .0225,

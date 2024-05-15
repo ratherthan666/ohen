@@ -4,7 +4,7 @@
 title = Ohnivý bränball
 
 # (str) Package name
-package.name = myapp
+package.name = branball
 
 # (str) Package domain (needed for android/ios packaging)
 package.domain = cz.skauting.ohen.bran

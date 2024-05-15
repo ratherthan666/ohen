@@ -185,12 +185,12 @@ class BranballGame(Screen):
                                                     pos_hint={'center_x': .20, 'y': .25},
                                                     size_hint=(.25, .05))
         self.components["One hand"].bind(on_press=lambda _: self.make_event(self.teams[0], "",
-                                                                            'Chycení do jedné ruky', 1))
+                                                                            'Chycení do jedné ruky', 2))
         self.components["Both hands"] = button.Button(text="Oběma rukama",
                                                            pos_hint={'center_x': .20, 'y': .19},
                                                            size_hint=(.25, .05))
         self.components["Both hands"].bind(on_press=lambda _: self.make_event(self.teams[0], "",
-                                                                              'Chycení do obou rukou', 2))
+                                                                              'Chycení do obou rukou', 1))
         self.components["Fielders argue"] = button.Button(text="Hádka s rozhodčím",
                                                           pos_hint={'center_x': .20, 'y': .13},
                                                           size_hint=(.25, .05))
