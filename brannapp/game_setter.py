@@ -2,6 +2,7 @@ from random import randint
 from kivy.uix.screenmanager import Screen
 from kivy.uix import button, label, textinput, checkbox
 from kivy.core.window import Window
+from game_status import BranGameStatus
 
 TEXT_SIZE_MODIFIER = {
     "Time label": .0225,
@@ -22,10 +23,9 @@ TEXT_SIZE_MODIFIER = {
 
 
 class GameSetter(Screen):
-    def __init__(self, time: list[dict[str, int]], team_names: list[str], **kwargs):
+    def __init__(self, status: BranGameStatus, **kwargs):
         super(GameSetter, self).__init__(**kwargs)
-        self.time: list[dict[str, int]] = time
-        self.team_names: list[str] = team_names
+        self.status = status
         self.components = {}
 
         self.setup_ui()
@@ -39,20 +39,15 @@ class GameSetter(Screen):
             self.components[comp].font_size = Window.height * TEXT_SIZE_MODIFIER[comp]
         return self
 
-    def set_page(self, next_page):
-        self.root.current = next_page
-
     def next(self, _):
-        self.time[0]["hours"] = int(self.components["Hours"].text if self.components["Hours"].text != "" else 0)
-        self.time[0]["minutes"] = int(self.components["Minutes"].text if self.components["Minutes"].text != "" else 0)
-        self.time[0]["seconds"] = int(self.components["Seconds"].text if self.components["Seconds"].text != "" else 0)
+        self.status.time["hours"] = int(self.components["Hours"].text if self.components["Hours"].text != "" else 0)
+        self.status.time["minutes"] = int(self.components["Minutes"].text if self.components["Minutes"].text != "" else 0)
+        self.status.time["seconds"] = int(self.components["Seconds"].text if self.components["Seconds"].text != "" else 0)
         if self.components["Randomize"].active and randint(0, 1) == 1:
-            self.team_names[1] = self.components["Team1"].text
-            self.team_names[0] = self.components["Team2"].text
+            self.status.team_names = [self.components["Team2"].text, self.components["Team1"].text]
         else:
-            self.team_names[0] = self.components["Team1"].text
-            self.team_names[1] = self.components["Team2"].text
-        self.manager.current = "start"
+            self.status.team_names = [self.components["Team1"].text, self.components["Team2"].text]
+        self.manager.current = next(self.status)
 
     def setup_ui(self):
         self.components["Header"] = label.Label(text="Vyberte základní parametry zápasu:",
