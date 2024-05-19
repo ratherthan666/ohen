@@ -1,9 +1,12 @@
+# pylint: disable=C0301
+
 """Module that holds the main game screen"""
 from kivy.uix.screenmanager import Screen
 from kivy.uix import button, label, textinput
 from kivy.core.window import Window
 from stopwatch import Stopwatch
 from game_status import BranGameStatus
+
 
 TEXT_SIZE_MODIFIER = {
     "Timer button": .02,
@@ -35,13 +38,18 @@ TEXT_SIZE_MODIFIER = {
 class BranballGame(Screen):
     """Main game screen"""
     def __init__(self, status: BranGameStatus, **kwargs):
+        """
+        Initialize the main game screen
+        :param status: game status
+        :param kwargs: another arguments passed to Screen constructor
+        """
         super().__init__(**kwargs)
         self.status = status
         self.timer = None
         self.batting_index = 0
         self.components = {}
         if self.status.output is not None:
-            with open(self.status.output, 'w') as f:
+            with open(self.status.output, 'w', encoding="utf8") as f:
                 f.write("čas,tým,hráč,událost,body")
 
         self.setup_header()
@@ -49,10 +57,11 @@ class BranballGame(Screen):
         self.setup_bater()
         self.setup_fielder()
         self.setup_runner()
-        for comp in self.components.keys():
-            self.add_widget(self.components[comp])
+        for comp in self.components.items():
+            self.add_widget(comp[1])
 
-    def on_enter(self, *args):
+    def on_enter(self, *_) -> None:
+        """Insert required texts after switching screen"""
         # Setup UI
         self.components["Score"].text = f"{str(self.status.score[0]):>3s}-{str(self.status.score[1]):<3s}"
         self.components["Field team"].text = self.status.team_names[0]
@@ -67,23 +76,40 @@ class BranballGame(Screen):
         self.resize_texts()
 
     def resize_texts(self, *_):
-        for comp in self.components.keys():
-            self.components[comp].font_size = Window.height * TEXT_SIZE_MODIFIER[comp]
+        """
+        Resize all texts to fit in components
+        :return: reference to this
+        """
+        for comp in self.components.items():
+            comp[1].font_size = Window.height * TEXT_SIZE_MODIFIER[comp[0]]
         return self
 
     def display_time(self, time: str) -> None:
+        """
+        display text on timer
+        :param time: time to display
+        """
         self.components["Timer"].text = time
 
-    def set_page(self):
+    def set_page(self) -> None:
+        """Change screen to next screen"""
         self.manager.current = next(self.status)
 
-    def change_timer(self, _):
+    def change_timer(self, _) -> None:
+        """Switch timer status running/stopped"""
         if self.timer.paused:
             self.timer.start()
         else:
             self.timer.stop()
 
-    def make_event(self, team: str, player: str, event: str, points: int):
+    def make_event(self, team: str, player: str, event: str, points: int) -> None:
+        """
+        Create a new game event
+        :param team: team name relevant to event
+        :param player: player that causes this event
+        :param event: name of event
+        :param points: points that causer's team get for this event
+        """
         if team == self.status.team_names[0] and points > 0:
             self.status.score[0] += points
         elif team == self.status.team_names[0]:
@@ -96,7 +122,7 @@ class BranballGame(Screen):
         str_event = f"\n{self.timer},{team},{player},{event},{points}"
         self.components["Backlog"].text += str_event
         if self.status.output is not None:
-            with open(self.status.output, 'a') as f:
+            with open(self.status.output, 'a', encoding="utf8") as f:
                 f.write(str_event)
         if event in {"Chycení do jedné ruky", "Chycení do obou rukou", "Brän"}:
             self.batting_index += 1
@@ -106,6 +132,7 @@ class BranballGame(Screen):
             self.components["Batter"].text = self.status.batter_list[self.batting_index]
 
     def setup_header(self):
+        """Create main fields: timer, score, backlog, end button"""
         self.components["Timer button"] = button.Button(text="Spustit/zastavit čas",
                                                         pos_hint={'center_x': .5, 'y': .94},
                                                         size_hint=(0.35, 0.05))
@@ -127,6 +154,7 @@ class BranballGame(Screen):
         self.components["End"].bind(on_press=lambda _: self.set_page())
 
     def setup_branner(self):
+        """Create UI for branner: name and his events"""
         self.components["Field team"] = label.Label(text="",
                                                     pos_hint={'center_x': .20, 'y': .70},
                                                     size_hint=(.25, .0325))
@@ -147,6 +175,7 @@ class BranballGame(Screen):
                                                                                    'Překročení kruhu', -4))
 
     def setup_bater(self):
+        """Create UI for batter: name and his events"""
         self.components["Bat team"] = label.Label(text="",
                                                   pos_hint={'center_x': .80, 'y': .70},
                                                   size_hint=(.25, .0325))
@@ -186,6 +215,7 @@ class BranballGame(Screen):
                                                         'Homerun', 6))
 
     def setup_fielder(self):
+        """Create UI for fielders and their events"""
         self.components["One hand"] = button.Button(text="Jednou rukou",
                                                     pos_hint={'center_x': .20, 'y': .25},
                                                     size_hint=(.25, .05))
@@ -203,6 +233,7 @@ class BranballGame(Screen):
                                                                                   'Hádka s rozhodčím', -6))
 
     def setup_runner(self):
+        """Create UI for runners and their events"""
         self.components["Run-out"] = button.Button(text="Doběh",
                                                    pos_hint={'center_x': .80, 'y': .25},
                                                    size_hint=(.25, .05))

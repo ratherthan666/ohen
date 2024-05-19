@@ -1,3 +1,6 @@
+# pylint: disable=C0301
+
+"""Module for halftime setter"""
 from random import randint
 from kivy.uix.screenmanager import Screen
 from kivy.uix import button, label, textinput, checkbox
@@ -20,26 +23,35 @@ TEXT_SIZE_MODIFIER = {
     "Header": .0225,
     "Confirm": .025
 }
+"""Relative font sizes"""
 
 
 class GameSetter(Screen):
+    """Screen for setting variables relevant for whole games"""
     def __init__(self, status: BranGameStatus, **kwargs):
-        super(GameSetter, self).__init__(**kwargs)
+        """
+        Initialize screen
+        :param status: Game status to fill in
+        :param kwargs: arguments to pass in screen constructor
+        """
+        super().__init__(**kwargs)
         self.status = status
         self.components = {}
 
         self.setup_ui()
-        for comp in self.components.keys():
-            self.add_widget(self.components[comp])
+        for comp in self.components.items():
+            self.add_widget(comp[1])
         Window.bind(on_resize=self.resize_texts)
         self.resize_texts(None)
 
     def resize_texts(self, *_):
-        for comp in self.components.keys():
-            self.components[comp].font_size = Window.height * TEXT_SIZE_MODIFIER[comp]
+        """Resize all texts to fit in components"""
+        for comp in self.components.items():
+            comp[1].font_size = Window.height * TEXT_SIZE_MODIFIER[comp[0]]
         return self
 
     def next(self, _):
+        """Save data from form and go to next screen"""
         self.status.time["hours"] = int(self.components["Hours"].text if self.components["Hours"].text != "" else 0)
         self.status.time["minutes"] = int(self.components["Minutes"].text if self.components["Minutes"].text != "" else 0)
         self.status.time["seconds"] = int(self.components["Seconds"].text if self.components["Seconds"].text != "" else 0)
@@ -50,6 +62,7 @@ class GameSetter(Screen):
         self.manager.current = next(self.status)
 
     def setup_ui(self):
+        """Setup form UI"""
         self.components["Header"] = label.Label(text="Vyberte základní parametry zápasu:",
                                                 pos_hint={'center_x': .5, 'y': .85},
                                                 size_hint=(0.40, 0.16))

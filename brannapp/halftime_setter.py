@@ -1,5 +1,8 @@
+# pylint: disable=C0301
+
+"""Module for halftime setter"""
 from kivy.uix.screenmanager import Screen
-from kivy.uix import button, label, textinput, checkbox
+from kivy.uix import button, label, textinput
 from kivy.core.window import Window
 from game_status import BranGameStatus
 
@@ -11,18 +14,26 @@ TEXT_SIZE_MODIFIER = {
     "Order": .025,
     "Confirm": .025
 }
+"""Relative font sizes"""
 
 
 class HalftimeSetter(Screen):
+    """Screen for setting variables relevant for halftime only"""
     def __init__(self, status: BranGameStatus, **kwargs):
-        super(HalftimeSetter, self).__init__(**kwargs)
+        """
+        Initialize screen
+        :param status: Game status to fill in
+        :param kwargs: arguments to pass in screen constructor
+        """
+        super().__init__(**kwargs)
         self.status = status
         self.components = {}
         self.setup_ui()
-        for comp in self.components.keys():
-            self.add_widget(self.components[comp])
+        for comp in self.components.items():
+            self.add_widget(comp[1])
 
-    def on_enter(self, *args):
+    def on_enter(self, *_):
+        """Fill dynamic fields on entering screen"""
         if self.status.phase == "halftime":
             self.status.switch_sides()
         self.components["Header"].text = (f"Vítejte ve {2 if self.status.phase == 'halftime' else 1}."
@@ -38,11 +49,13 @@ class HalftimeSetter(Screen):
         self.resize_texts(None)
 
     def resize_texts(self, *_):
-        for comp in self.components.keys():
-            self.components[comp].font_size = Window.height * TEXT_SIZE_MODIFIER[comp]
+        """Resize all texts to fit in components"""
+        for comp in self.components.items():
+            comp[1].font_size = Window.height * TEXT_SIZE_MODIFIER[comp[0]]
         return self
 
     def next(self, _):
+        """Save data from form and go to next screen"""
         if self.components["Branner"].text:
             self.status.branner = self.components["Branner"].text
         self.status.batter_list = []
@@ -54,6 +67,7 @@ class HalftimeSetter(Screen):
         self.manager.current = next(self.status)
 
     def setup_ui(self):
+        """Setup form UI"""
         self.components["Header"] = label.Label(text=f"Vítejte ve {2 if self.status.phase == 'halftime' else 1}. "
                                                      f"poločase zápasu.\n"
                                                      f"Stav je {str(self.status.score[0]):>3s}-{str(self.status.score[1]):<3s}",
