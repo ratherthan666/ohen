@@ -1,5 +1,5 @@
 import tkinter as tk
-from beh_client import Client
+from beh.beh_app.beh_client import Client
 from datetime import datetime
 
 
