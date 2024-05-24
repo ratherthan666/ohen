@@ -1,5 +1,6 @@
 from kivy.app import App
 from connect_gui import Connection
+from client_gui import Beh
 from kivy.uix.screenmanager import ScreenManager
 
 
@@ -11,6 +12,7 @@ class BranballApp(App):
 
     def build(self):
         self.manager.add_widget(Connection(self.client, name="init"))
+        self.manager.add_widget(Beh(self.client, name="beh"))
         self.manager.current = "init"
         return self.manager
 

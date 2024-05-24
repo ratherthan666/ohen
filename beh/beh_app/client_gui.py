@@ -5,17 +5,17 @@ from kivy.uix.screenmanager import Screen
 from kivy.uix import button, label, textinput
 from kivy.core.window import Window
 from beh_client import Client
+from datetime import datetime
 
 TEXT_SIZE_MODIFIER = {
-"Header": .025,
-"IP": .05,
-"Port": .05,
+"Header": .03,
+"Number": .05,
 "Confirm": .025,
 }
 """Relative font sizes"""
 
 
-class Connection(Screen):
+class Beh(Screen):
     """Screen for setting variables relevant for whole games"""
     def __init__(self, client: list, **kwargs):
         """
@@ -41,33 +41,29 @@ class Connection(Screen):
 
     def next(self, _):
         """Save data from form and go to next screen"""
-        address = self.components["IP"].text
-        port = 0
-        if self.components["Port"].text != "":
-            port = int(self.components["Port"].text)
+        time = datetime.now()
         try:
-            cl = Client(address, port)
-            self.client.append(cl)
-            self.manager.current = "beh"
-        except ConnectionRefusedError:
-            self.components["Header"].text = "[color=ff3333]Nepodařilo se připojit k serveru[/color]"
-        except OSError:
-            self.components["Header"].text = "[color=ff3333]Nepodařilo se připojit k serveru[/color]"
+            if self.components["Number"].text != "":
+                num = int(self.components["Number"].text)
+            else:
+                raise ValueError
+        except ValueError:
+            pass
+        else:
+            self.components['Number'].text = ""
+            self.client[0].send_result(num, time)
+
 
     def setup_ui(self):
         """Setup form UI"""
-        self.components["Header"] = label.Label(text="Vložte IP adresu a port serveru:",
+        self.components["Header"] = label.Label(text="Číslo závodníka:",
                                                 pos_hint={'center_x': .5, 'y': .85},
                                                 size_hint=(0.40, 0.16), markup=True)
-        self.components["IP"] = textinput.TextInput(pos_hint={'center_x': .5, 'y': .60},
-                                                    size_hint=(0.6, 0.2),
-                                                    halign="right",
-                                                    hint_text="IP adresa")
-        self.components["Port"] = textinput.TextInput(input_filter="int",
+        self.components["Number"] = textinput.TextInput(input_filter="int",
                                                       pos_hint={'center_x': .5, 'y': .30},
                                                       size_hint=(0.6, 0.2),
                                                       halign="right",
-                                                      hint_text="Port")
+                                                      hint_text="Číslo")
         self.components["Confirm"] = button.Button(text="Pokračovat",
                                                    pos_hint={'center_x': .5, 'y': .05},
                                                    size_hint=(0.40, 0.10))
