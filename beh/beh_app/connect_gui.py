@@ -4,7 +4,7 @@
 from kivy.uix.screenmanager import Screen
 from kivy.uix import button, label, textinput
 from kivy.core.window import Window
-from beh_client import Client
+from beh.beh_app.beh_client import Client
 
 TEXT_SIZE_MODIFIER = {
 "Header": .025,
