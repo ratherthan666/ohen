@@ -1,6 +1,7 @@
 from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager
-from beh.beh_app import connect_gui, client_gui
+import connect_gui
+import client_gui
 
 
 class BranballApp(App):

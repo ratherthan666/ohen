@@ -4,7 +4,7 @@
 from kivy.uix.screenmanager import Screen
 from kivy.uix import button, label, textinput
 from kivy.core.window import Window
-from beh.beh_app.beh_client import Client
+from beh_client import Client
 
 TEXT_SIZE_MODIFIER = {
 "Header": .025,
@@ -49,10 +49,10 @@ class Connection(Screen):
             cl = Client(address, port)
             self.client.append(cl)
             self.manager.current = "beh"
-        except ConnectionRefusedError:
-            self.components["Header"].text = "[color=ff3333]Nepodařilo se připojit k serveru[/color]"
-        except OSError:
-            self.components["Header"].text = "[color=ff3333]Nepodařilo se připojit k serveru[/color]"
+        except ConnectionRefusedError as e:
+            self.components["Header"].text = f"[color=ff3333]{address}:{port} connection refused \n({e})[/color]"
+        # except OSError as e:
+        #     self.components["Header"].text = f"[color=ff3333]OSError {address}:{port} \n({e})[/color]"
 
     def setup_ui(self):
         """Setup form UI"""
