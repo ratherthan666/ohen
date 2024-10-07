@@ -106,12 +106,13 @@ class BasicAccount(BankProduct, ABC):
         self.tax_rate = tax_rate
         self.interest_strategy = interest_strategy
 
-    def copy(self, account_number: int):
+    def copy(self, account_number: int, account_owner: BankClient):
         """
         Initializes a basic bank account as a copy of an existing account
         :param account_number: New account number
+        :param account_owner: New account owner
         """
-        return BasicAccount(account_number, self.owner, self.interest_rate, self.maintenance_rate,
+        return BasicAccount(account_number, account_owner, self.interest_rate, self.maintenance_rate,
                             self.maintenance_fare,self.tax_rate, self.interest_strategy)
 
     def deposit(self, amount: float) -> float:
@@ -146,4 +147,65 @@ class BasicAccount(BankProduct, ABC):
 
 
 class BasicLoan(BankProduct, ABC):
-    """Represents """
+    """Represents a basic loan from bank"""
+
+    def __init__(self, account_num: int, account_owner: BankClient, loaned_amount: float, interest_rate: float, maintenance_rate: float,
+                 maintenance_fare: float, interest_strategy: InterestStrategy):
+        """
+        Initializes a basic bank account with specified parameters
+        :param account_num: Account number
+        :param account_owner: Account owner
+        :param loaned_amount: Amount of money loaned
+        :param interest_rate: Interest rate
+        :param maintenance_rate: Maintenance rate
+        :param maintenance_fare: Maintenance fare
+        :param interest_strategy: Interest strategy
+        """
+        super().__init__(account_num, account_owner)
+        self.balance = -loaned_amount
+        self.interest_rate = interest_rate
+        self.maintenance_rate = maintenance_rate
+        self.maintenance_fare = maintenance_fare
+        self.interest_strategy = interest_strategy
+
+    def copy(self, account_number: int, account_owner: BankClient, loaned_amount: int):
+        """
+        Initializes a basic bank account as a copy of an existing account
+        :param account_number: New account number
+        :param account_owner: New account owner
+        """
+        return BasicAccount(account_number, account_owner, loaned_amount,  self.interest_rate, self.maintenance_rate,
+                            self.maintenance_fare, self.interest_strategy)
+
+    def deposit(self, amount: float) -> float:
+        """
+        Performs a deposit event
+        :param amount: amount of the deposit
+        :return: new balance
+        """
+        self.balance += self.interest()
+        if amount >= self.balance:
+            amount += self.balance
+            self.balance = 0
+            t = datetime.datetime.now(tz=datetime.timezone.utc)
+            self.operations.append([t, BankProductOperation.DEPOSIT, amount])
+            self.operations.append([t, BankProductOperation.CLOSURE])
+            return amount
+        self.operations.append([datetime.datetime.now(tz=datetime.timezone.utc), BankProductOperation.DEPOSIT, amount])
+        return self.balance
+
+    def withdrawal(self, amount: float) -> float:
+        """
+        Performs a withdrawal event (fail)
+        :param amount: no effect
+        :raise NotImplementedError: when called
+        """
+        raise NotImplementedError
+
+    def interest(self) -> float:
+        """Count interest from current balance, includes maintenance and tax"""
+        delta = datetime.datetime.now(tz=datetime.timezone.utc)-self.operations[-1][0]
+        periods = delta/self.interest_strategy.value
+        interest = self.balance*math.e**(self.interest_rate * periods) - self.balance
+        maintenance = self.balance * self.maintenance_rate * periods + periods * self.maintenance_fare
+        return interest - maintenance
