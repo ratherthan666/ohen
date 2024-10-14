@@ -4,7 +4,6 @@ import datetime
 import math
 from abc import ABC, abstractmethod
 from enum import Enum
-from bank_client import BankClient
 
 
 class BankProductOperation(Enum):
@@ -30,7 +29,7 @@ class InterestStrategy(Enum):
 class BankProduct(ABC):
     """Represents a generic bank product"""
 
-    def __init__(self, account_num: int, account_owner: BankClient):
+    def __init__(self, account_num: int, account_owner: int):
         """
         Initializes a bank product
         :param account_num: Account number
@@ -49,6 +48,9 @@ class BankProduct(ABC):
         if not isinstance(other, BankProduct):
             raise TypeError
         return self.num < other.num
+
+    def __str__(self):
+        return f"Account no. {self.num} ({self.owner}): {self.amount()}"
 
     def amount(self) -> float:
         """
@@ -173,6 +175,7 @@ class BasicLoan(BankProduct, ABC):
         Initializes a basic bank account as a copy of an existing account
         :param account_number: New account number
         :param account_owner: New account owner
+        :param loaned_amount: Amount of money loaned (for new loan)
         """
         return BasicAccount(account_number, account_owner, loaned_amount,  self.interest_rate, self.maintenance_rate,
                             self.maintenance_fare, self.interest_strategy)
