@@ -16,9 +16,9 @@ class MyBasicBank:
         self.clients[cid] = (BankClient(cid, name, surname))
 
     def find_clients(self, *, cid: int=None, name:str=None, surname:str=None):
-        for client_id, client in self.clients:
-            if ((cid is None or client_id == cid) and (name is None or client.name == name) and
-                    (surname is None or client.surname == surname)):
+        for client in self.clients:
+            if ((cid is None or client == cid) and (name is None or self.clients[client].name == name) and
+                    (surname is None or self.clients[client].surname == surname)):
                 print(client)
 
     def new_account(self, cid):

@@ -3,6 +3,7 @@
 import datetime
 import math
 from abc import ABC, abstractmethod
+from datetime import timedelta
 from enum import Enum
 
 
@@ -89,7 +90,7 @@ class BankProduct(ABC):
 class BasicAccount(BankProduct, ABC):
     """Represents a basic bank account"""
 
-    def __init__(self, account_num: int, account_owner: BankClient, interest_rate: float, maintenance_rate: float,
+    def __init__(self, account_num: int, account_owner: int, interest_rate: float, maintenance_rate: float,
                  maintenance_fare: float, tax_rate: float, interest_strategy: InterestStrategy):
         """
         Initializes a basic bank account with specified parameters
@@ -108,7 +109,7 @@ class BasicAccount(BankProduct, ABC):
         self.tax_rate = tax_rate
         self.interest_strategy = interest_strategy
 
-    def copy(self, account_number: int, account_owner: BankClient):
+    def copy(self, account_number: int, account_owner: int):
         """
         Initializes a basic bank account as a copy of an existing account
         :param account_number: New account number
@@ -147,11 +148,10 @@ class BasicAccount(BankProduct, ABC):
         maintenance = self.balance * self.maintenance_rate * periods + periods * self.maintenance_fare
         return interest - maintenance
 
-
 class BasicLoan(BankProduct, ABC):
     """Represents a basic loan from bank"""
 
-    def __init__(self, account_num: int, account_owner: BankClient, loaned_amount: float, interest_rate: float, maintenance_rate: float,
+    def __init__(self, account_num: int, account_owner: int, loaned_amount: float, interest_rate: float, maintenance_rate: float,
                  maintenance_fare: float, interest_strategy: InterestStrategy):
         """
         Initializes a basic bank account with specified parameters
@@ -170,7 +170,7 @@ class BasicLoan(BankProduct, ABC):
         self.maintenance_fare = maintenance_fare
         self.interest_strategy = interest_strategy
 
-    def copy(self, account_number: int, account_owner: BankClient, loaned_amount: int):
+    def copy(self, account_number: int, account_owner: int, loaned_amount: int):
         """
         Initializes a basic bank account as a copy of an existing account
         :param account_number: New account number
@@ -212,3 +212,19 @@ class BasicLoan(BankProduct, ABC):
         interest = self.balance*math.e**(self.interest_rate * periods) - self.balance
         maintenance = self.balance * self.maintenance_rate * periods + periods * self.maintenance_fare
         return interest - maintenance
+
+class TerminedDeposit(BankProduct, ABC):
+
+    def __init__(self, account_num: int, account_owner: int, interest_rate: float,
+                 maintenance_fare: float, tax_rate: float, account_length: timedelta):
+        super().__init__(account_num, account_owner)
+        self.interest_rate = interest_rate
+        self.maintenance_fare = maintenance_fare
+        self.tax_rate = tax_rate
+        self.account_length = account_length
+
+    def deposit(self, amount: float) -> float:
+        if self.balance == 0:
+            self.balance = amount
+            return self.balance
+        raise NotImplementedError("You cannot deposit to existing terminated deposit")
