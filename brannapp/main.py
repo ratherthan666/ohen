@@ -1,3 +1,9 @@
+"""
+Version: 0.2 Alpha
+Release date: 4.11.2024
+Author: Robin Palán
+"""
+
 from kivy.app import App
 from game import BranballGame
 from game_setter import GameSetter

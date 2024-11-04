@@ -30,10 +30,12 @@ TEXT_SIZE_MODIFIER = {
     "Burned": .015,
     "Batters argue": .0125,
     "Backlog": .0125,
-    "End": .02
+    "End": .02,
+    "Back": .02
 }
 """Relative font sizes"""
 
+CSV_HEADER = "čas,tým,hráč,událost,body"
 
 class BranballGame(Screen):
     """Main game screen"""
@@ -50,7 +52,7 @@ class BranballGame(Screen):
         self.components = {}
         if self.status.output is not None:
             with open(self.status.output, 'w', encoding="utf8") as f:
-                f.write("čas,tým,hráč,událost,body")
+                f.write(CSV_HEADER)
 
         self.setup_header()
         self.setup_branner()
@@ -65,14 +67,16 @@ class BranballGame(Screen):
         # Setup UI
         self.components["Score"].text = f"{str(self.status.score[0]):>3s}-{str(self.status.score[1]):<3s}"
         self.components["Field team"].text = self.status.team_names[0]
+        self.components["Bat team"].text = self.status.team_names[1]
         self.components["Branner"].text = self.status.branner
-        self.components["Batter number"].text = str(self.batting_index)
+        self.components["Batter number"].text = str(self.batting_index+1)
         self.components["Batter"].text = self.status.batter_list[self.batting_index]
-        self.components["Backlog"].text = "čas,tým,hráč,událost,body"
+        self.components["Backlog"].text = CSV_HEADER
 
         Window.bind(on_resize=self.resize_texts)
 
         self.timer = Stopwatch(out_function=self.display_time, **self.status.time)
+        self.timer.output(self.display_time)
         self.resize_texts()
 
     def resize_texts(self, *_):
@@ -93,6 +97,7 @@ class BranballGame(Screen):
 
     def set_page(self) -> None:
         """Change screen to next screen"""
+        self.timer.killed = True
         self.manager.current = next(self.status)
 
     def change_timer(self, _) -> None:
@@ -104,7 +109,7 @@ class BranballGame(Screen):
 
     def make_event(self, team: str, player: str, event: str, points: int) -> None:
         """
-        Create a new game event
+        Creates a new game event
         :param team: team name relevant to event
         :param player: player that causes this event
         :param event: name of event
@@ -131,6 +136,33 @@ class BranballGame(Screen):
             self.components["Batter number"].text = str(self.batting_index+1)
             self.components["Batter"].text = self.status.batter_list[self.batting_index]
 
+    def revert_event(self) -> None:
+        """
+        Revert last event maked
+        Warning: when there is no event left does nothing
+        """
+        if self.components["Backlog"].text == CSV_HEADER:
+            return
+        event = self.components["Backlog"].text.split("\n")[-1]
+        self.components["Backlog"].text = "\n".join(self.components["Backlog"].text.split("\n")[:-1])
+        timer, team, player, event, points = event.split(",")
+        points = int(points)
+        if event in {"Chycení do jedné ruky", "Chycení do obou rukou", "Brän"}:
+            self.batting_index -= 1
+            if self.batting_index < 0:
+                self.batting_index = len(self.batter_list)-1
+            self.components["Batter number"].text = str(self.batting_index+1)
+            self.components["Batter"].text = self.status.batter_list[self.batting_index]
+        if team == self.status.team_names[0] and points > 0:
+            self.status.score[0] -= points
+        elif team == self.status.team_names[0]:
+            self.status.score[1] += points
+        elif team == self.status.team_names[1] and points > 0:
+            self.status.score[1] -= points
+        else:
+            self.status.score[0] += points
+        self.components["Score"].text = f"{str(self.status.score[0]):>3s}-{str(self.status.score[1]):<3s}"
+
     def setup_header(self):
         """Create main fields: timer, score, backlog, end button"""
         self.components["Timer button"] = button.Button(text="Spustit/zastavit čas",
@@ -144,19 +176,23 @@ class BranballGame(Screen):
                                                pos_hint={'center_x': .5, 'y': .64},
                                                size_hint=(0.5, 0.15))
         self.components["Backlog"] = textinput.TextInput(text="",
-                                                         pos_hint={'center_x': .5, 'y': .1},
+                                                         pos_hint={'center_x': .5, 'y': .15},
                                                          size_hint=(.3, .5),
                                                          readonly=True,
                                                          halign='left')
         self.components["End"] = button.Button(text="Ukončit",
                                                pos_hint={'center_x': .5, 'y': .02},
-                                               size_hint=(0.35, 0.05))
+                                               size_hint=(0.25, 0.05))
         self.components["End"].bind(on_press=lambda _: self.set_page())
+        self.components["Back"] = button.Button(text="Zpět",
+                                               pos_hint={'center_x': .5, 'y': .08},
+                                               size_hint=(0.25, 0.05))
+        self.components["Back"].bind(on_press=lambda _: self.revert_event())
 
     def setup_branner(self):
         """Create UI for branner: name and his events"""
         self.components["Field team"] = label.Label(text="",
-                                                    pos_hint={'center_x': .20, 'y': .70},
+                                                    pos_hint={'center_x': .20, 'y': .8},
                                                     size_hint=(.25, .0325))
         self.components["Branner"] = label.Label(text="",
                                                  pos_hint={'center_x': .20, 'y': .64},
@@ -177,13 +213,13 @@ class BranballGame(Screen):
     def setup_bater(self):
         """Create UI for batter: name and his events"""
         self.components["Bat team"] = label.Label(text="",
-                                                  pos_hint={'center_x': .80, 'y': .70},
+                                                  pos_hint={'center_x': .80, 'y': .8},
                                                   size_hint=(.25, .0325))
         self.components["Batter number"] = label.Label(text="",
-                                                       pos_hint={'center_x': .80, 'y': .65},
+                                                       pos_hint={'center_x': .80, 'y': .7},
                                                        size_hint=(.25, .0325))
         self.components["Batter"] = label.Label(text="",
-                                                pos_hint={'center_x': .80, 'y': .60},
+                                                pos_hint={'center_x': .80, 'y': .64},
                                                 size_hint=(.25, .0325))
         self.components["Bat throw"] = button.Button(text="Odhození pálky",
                                                      pos_hint={'center_x': .80, 'y': .55},
