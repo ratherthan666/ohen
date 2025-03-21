@@ -10,6 +10,7 @@ from game_setter import GameSetter
 from halftime_setter import HalftimeSetter
 from kivy.uix.screenmanager import ScreenManager
 from game_status import BranGameStatus
+from check_folder import check_folder
 
 
 class BranballApp(App):
