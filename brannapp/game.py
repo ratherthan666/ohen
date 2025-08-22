@@ -69,6 +69,7 @@ class BranballGame(Screen):
         self.components["Field team"].text = self.status.team_names[0]
         self.components["Bat team"].text = self.status.team_names[1]
         self.components["Branner"].text = self.status.branner
+        self.batting_index = 0
         self.components["Batter number"].text = str(self.batting_index+1)
         self.components["Batter"].text = self.status.batter_list[self.batting_index]
         self.components["Backlog"].text = CSV_HEADER

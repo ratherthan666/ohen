@@ -1,5 +1,6 @@
 """Module for some random utilities"""
 from datetime import datetime
+import os
 
 
 PHASES = ["init", "start", "1st half", "halftime", "2nd half", "results"]
@@ -19,8 +20,10 @@ class BranGameStatus:
         self.score = [0, 0]
         self.batter_list = []
         self.branner = "Bränner"
-        self.output = ("/storage/emulated/0/Documents/Bran/" +
-                       datetime.now().strftime("%Y%m%d-%H%M%S") + ".csv")
+        if not os.path.exists(os.path.join(os.path.expanduser("~"), "Bran")):
+            os.makedirs(os.path.join(os.path.expanduser("~"), "Bran"))
+        self.output = (os.path.join(os.path.expanduser("~"), "Bran",
+                       datetime.now().strftime("%Y%m%d-%H%M%S") + ".csv"))
         self.ph = 0
 
     def __next__(self) -> str:
@@ -29,8 +32,8 @@ class BranGameStatus:
         :return: relevant screen for the new phase
         """
         self.ph += 1
-        if self.phase == len(PHASES):
-            self.ph = 0
+        if self.ph == len(PHASES):
+            exit(0)
         return SCREENS[self.ph]
 
     @property
