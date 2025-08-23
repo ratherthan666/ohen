@@ -1,6 +1,8 @@
 """Module for some random utilities"""
 from datetime import datetime
 import os
+from kivy.app import App
+from kivy.utils import platform
 
 
 PHASES = ["init", "start", "1st half", "halftime", "2nd half", "results"]
@@ -13,17 +15,23 @@ assert len(PHASES) == len(SCREENS)
 
 class BranGameStatus:
     """Game status for Bränball game"""
-    def __init__(self) -> None:
+    def __init__(self, app: App) -> None:
         """Initialize new game"""
         self.time = {"hours": 0, "minutes": 0, "seconds": 0}
         self.team_names = ["A", "B"]
         self.score = [0, 0]
         self.batter_list = []
         self.branner = "Bränner"
-        if not os.path.exists(os.path.join(os.path.expanduser("~"), "Bran")):
-            os.makedirs(os.path.join(os.path.expanduser("~"), "Bran"))
-        self.output = (os.path.join(os.path.expanduser("~"), "Bran",
-                       datetime.now().strftime("%Y%m%d-%H%M%S") + ".csv"))
+        if platform == "android":
+            from android.storage import app_storage_path
+            if not os.path.exists(app_storage_path()):
+                os.makedirs(app_storage_path())
+            self.output = (os.path.join(app_storage_path(), datetime.now().strftime("%Y%m%d-%H%M%S") + ".csv"))
+        else:
+            if not os.path.exists(app.user_data_dir):
+                os.makedirs(app.user_data_dir)
+            self.output = (os.path.join(app.user_data_dir, datetime.now().strftime("%Y%m%d-%H%M%S") + ".csv"))
+        print(app_storage_path())
         self.ph = 0
 
     def __next__(self) -> str:
