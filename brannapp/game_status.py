@@ -7,7 +7,7 @@ from kivy.utils import platform
 
 PHASES = ["init", "start", "1st half", "halftime", "2nd half", "results"]
 """Phases of game"""
-SCREENS = ["init", "halftime", "game", "halftime", "game", "game"]
+SCREENS = ["init", "halftime", "game", "halftime", "game", "results"]
 """Screens showed during phases of game"""
 
 assert len(PHASES) == len(SCREENS)
@@ -27,11 +27,12 @@ class BranGameStatus:
             if not os.path.exists(app_storage_path()):
                 os.makedirs(app_storage_path())
             self.output = (os.path.join(app_storage_path(), datetime.now().strftime("%Y%m%d-%H%M%S") + ".csv"))
+            print(app_storage_path())
         else:
             if not os.path.exists(app.user_data_dir):
                 os.makedirs(app.user_data_dir)
             self.output = (os.path.join(app.user_data_dir, datetime.now().strftime("%Y%m%d-%H%M%S") + ".csv"))
-        print(app_storage_path())
+            print(app.user_data_dir)
         self.ph = 0
 
     def __next__(self) -> str:
