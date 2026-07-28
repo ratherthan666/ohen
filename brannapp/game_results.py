@@ -6,7 +6,6 @@ from kivy.uix.screenmanager import Screen
 from kivy.uix import button, label, textinput, checkbox
 from kivy.core.window import Window
 from game_status import BranGameStatus
-from kivy.app import App
 
 TEXT_SIZE_MODIFIER = {
     "Restart": .025,
@@ -29,11 +28,11 @@ EVENTS = {
 }
 
 class GameResults(Screen):
-    def __init__(self, statuses: list[BranGameStatus], app: App, **kwargs):
+    def __init__(self, app, reseter, **kwargs):
         super().__init__(**kwargs)
-        self.statuses = statuses
-        self.res_status = statuses[0]
         self.app = app
+        self.res_status = app.status
+        self.reseter = reseter
         self.components = {}
         self.events = [{}, {}]
         self._setup_ui()
@@ -58,11 +57,12 @@ class GameResults(Screen):
                 self.events[i][desc[3]] = 1
 
     def reset(self, *_):
-        self.statuses[0] = BranGameStatus(self.app)
+        self.reseter()
         self.manager.current = "init"
 
     def on_enter(self, *_):
         """Fill dynamic fields on entering screen"""
+        self.status = self.app.status
         self.load_stats()
         self.components["Winner"].text = self.res_status.team_names[0]
         self.components["Looser"].text = self.res_status.team_names[1]
@@ -96,7 +96,7 @@ class GameResults(Screen):
                                                         pos_hint={"center_x": .8, "y": y},
                                                         size_hint=(.25, .05))
         TEXT_SIZE_MODIFIER[f"Winner-{stat}"] = .05
-        TEXT_SIZE_MODIFIER[f"{stat}"] = .03
+        TEXT_SIZE_MODIFIER[f"{stat}"] = .02
         TEXT_SIZE_MODIFIER[f"Looser-{stat}"] = .05
 
     def _setup_ui(self):

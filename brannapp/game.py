@@ -39,14 +39,15 @@ CSV_HEADER = "čas,tým,hráč,událost,body"
 
 class BranballGame(Screen):
     """Main game screen"""
-    def __init__(self, status: BranGameStatus, **kwargs):
+    def __init__(self, app, **kwargs):
         """
         Initialize the main game screen
-        :param status: game status
+        :param app: game App
         :param kwargs: another arguments passed to Screen constructor
         """
         super().__init__(**kwargs)
-        self.status = status
+        self.app = app
+        self.status = app.status
         self.timer = None
         self.batting_index = 0
         self.components = {}
@@ -65,6 +66,7 @@ class BranballGame(Screen):
     def on_enter(self, *_) -> None:
         """Insert required texts after switching screen"""
         # Setup UI
+        self.status = self.app.status
         self.components["Score"].text = f"{str(self.status.score[0]):>3s}-{str(self.status.score[1]):<3s}"
         self.components["Field team"].text = self.status.team_names[0]
         self.components["Bat team"].text = self.status.team_names[1]
@@ -151,7 +153,7 @@ class BranballGame(Screen):
         if event in {"Chycení do jedné ruky", "Chycení do obou rukou", "Brän"}:
             self.batting_index -= 1
             if self.batting_index < 0:
-                self.batting_index = len(self.batter_list)-1
+                self.batting_index = len(self.status.batter_list)-1
             self.components["Batter number"].text = str(self.batting_index+1)
             self.components["Batter"].text = self.status.batter_list[self.batting_index]
         if team == self.status.team_names[0] and points > 0:

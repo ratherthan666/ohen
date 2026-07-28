@@ -28,19 +28,21 @@ TEXT_SIZE_MODIFIER = {
 
 class GameSetter(Screen):
     """Screen for setting variables relevant for whole games"""
-    def __init__(self, status: BranGameStatus, **kwargs):
+    def __init__(self, app, **kwargs):
         """
         Initialize screen
-        :param status: Game status to fill in
+        :param app: game App
         :param kwargs: arguments to pass in screen constructor
         """
         super().__init__(**kwargs)
-        self.status = status
+        self.app = app
+        self.status = app.status
         self.components = {}
 
         self.setup_ui()
         for comp in self.components.items():
             self.add_widget(comp[1])
+
         Window.bind(on_resize=self.resize_texts)
         self.resize_texts(None)
 
@@ -49,6 +51,9 @@ class GameSetter(Screen):
         for comp in self.components.items():
             comp[1].font_size = Window.height * TEXT_SIZE_MODIFIER[comp[0]]
         return self
+
+    def on_enter(self, *_):
+        self.status = self.app.status
 
     def next(self, _):
         """Save data from form and go to next screen"""

@@ -16,14 +16,17 @@ from game_results import GameResults
 class BranballApp(App):
     def __init__(self):
         super().__init__()
-        self.status = [BranGameStatus(self)]
+        self.status = BranGameStatus(self)
         self.manager = ScreenManager()
 
+    def _reset(self):
+        self.status = BranGameStatus(self)
+
     def build(self):
-        self.manager.add_widget(GameSetter(self.status[0], name="init"))
-        self.manager.add_widget(HalftimeSetter(self.status[0], name="halftime"))
-        self.manager.add_widget(BranballGame(self.status[0], name="game"))
-        self.manager.add_widget(GameResults(self.status, self, name="results"))
+        self.manager.add_widget(GameSetter(self, name="init"))
+        self.manager.add_widget(HalftimeSetter(self, name="halftime"))
+        self.manager.add_widget(BranballGame(self, name="game"))
+        self.manager.add_widget(GameResults(self, self._reset, name="results"))
         self.manager.current = "init"
         return self.manager
 

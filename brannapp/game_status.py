@@ -18,7 +18,7 @@ class BranGameStatus:
     def __init__(self, app: App) -> None:
         """Initialize new game"""
         self.time = {"hours": 0, "minutes": 0, "seconds": 0}
-        self.team_names = ["A", "B"]
+        self.team_names = ["", ""]
         self.score = [0, 0]
         self.batter_list = []
         self.branner = "Bränner"
@@ -27,12 +27,10 @@ class BranGameStatus:
             if not os.path.exists(app_storage_path()):
                 os.makedirs(app_storage_path())
             self.output = (os.path.join(app_storage_path(), datetime.now().strftime("%Y%m%d-%H%M%S") + ".csv"))
-            print(app_storage_path())
         else:
             if not os.path.exists(app.user_data_dir):
                 os.makedirs(app.user_data_dir)
             self.output = (os.path.join(app.user_data_dir, datetime.now().strftime("%Y%m%d-%H%M%S") + ".csv"))
-            print(app.user_data_dir)
         self.ph = 0
 
     def __next__(self) -> str:
